@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SyncFit Kraft Inventory + Order Management
 
-## Getting Started
+Production-ready Next.js + Supabase platform with admin/client workflows, registration approval, item-level order decisions, analytics, import/export, and transactional stock protection.
 
-First, run the development server:
+## Run Migrations (Order)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. `supabase/migrations/20260219163000_inventory_system.sql`
+2. `supabase/migrations/20260219190000_platform_extensions.sql`
+3. `supabase/migrations/20260219210000_business_upgrade.sql`
+
+## New Upgrades
+
+- Product `type` support: `GY | NS`
+- Product admin controls: `price`, `discount`, `stock`, `is_active`, `low_stock_threshold`, `image_url`
+- Partial order handling via item-level acceptance/rejection (`item_status`)
+- Status model supports `pending`, `accepted`, `rejected`, `partial` (legacy values still compatible)
+- Analytics upgrades with revenue + monthly/yearly charts
+- Unified admin export API: `/api/admin/export?range=monthly&type=csv|xlsx|pdf`
+- Unified admin import API: `/api/admin/import` (target `stock` or `orders`, CSV/XLSX)
+- Notifications route: `/api/notifications`
+
+## Admin Sections
+
+- `/admin`
+- `/admin/products`
+- `/admin/orders`
+- `/admin/users`
+- `/admin/analytics`
+- `/admin/import-export`
+- `/admin/settings`
+
+## Required Env Vars
+
+```env
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-anon-public-key
+
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=mailer@example.com
+SMTP_PASS=your-smtp-password
+SMTP_FROM="SyncFit Kraft <no-reply@example.com>"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Notes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Admin/API admin routes are middleware-protected.
+- Stock reduces only on accepted items.
+- Partial orders are derived from mixed accepted/rejected item decisions.
+- Existing data and legacy statuses are preserved for compatibility.
