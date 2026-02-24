@@ -855,35 +855,72 @@ export async function acceptOrderWithSpecChangesAction(formData: FormData) {
 export async function createOrderAction(formData: FormData) {
   const { supabase, user, profile } = await requireRole("client");
 
-  let gsm: number;
-  let bf: number;
-  let inch: number;
-  let quantity: number;
-  const type = String(formData.get("type") ?? "").trim().toUpperCase();
-  try {
-    gsm = parsePositiveNumber(formData.get("gsm"), "GSM");
-    bf = parsePositiveNumber(formData.get("bf"), "BF");
-    inch = parsePositiveNumber(formData.get("inch"), "Inch");
-    quantity = parsePositiveNumber(formData.get("quantity"), "Quantity");
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Invalid input";
-    redirect(`/client?error=${encodeURIComponent(message)}`);
+  const gsmEntries = formData.getAll("gsm");
+  const bfEntries = formData.getAll("bf");
+  const inchEntries = formData.getAll("inch");
+  const typeEntries = formData.getAll("type");
+  const quantityEntries = formData.getAll("quantity");
+
+  const rowCount = Math.max(
+    gsmEntries.length,
+    bfEntries.length,
+    inchEntries.length,
+    typeEntries.length,
+    quantityEntries.length,
+  );
+
+  if (rowCount <= 0) {
+    redirect("/client?error=No+order+items+provided");
   }
 
-  if (!["GY", "NS"].includes(type)) {
-    redirect("/client?error=Select+valid+type");
+  if (
+    gsmEntries.length !== rowCount ||
+    bfEntries.length !== rowCount ||
+    inchEntries.length !== rowCount ||
+    typeEntries.length !== rowCount ||
+    quantityEntries.length !== rowCount
+  ) {
+    redirect("/client?error=Order+rows+are+incomplete");
   }
 
-  const { data: newOrderId, error } = await supabase.rpc("create_order_with_item_v2", {
-    p_gsm: gsm,
-    p_bf: bf,
-    p_inch: inch,
-    p_type: type,
-    p_quantity: quantity,
-  });
+  const orderRows: Array<{ gsm: number; bf: number; inch: number; type: ProductType; quantity: number }> = [];
+  for (let index = 0; index < rowCount; index += 1) {
+    let gsm: number;
+    let bf: number;
+    let inch: number;
+    let quantity: number;
+    const type = String(typeEntries[index] ?? "").trim().toUpperCase();
+    try {
+      gsm = parsePositiveNumber(gsmEntries[index], "GSM");
+      bf = parsePositiveNumber(bfEntries[index], "BF");
+      inch = parsePositiveNumber(inchEntries[index], "Inch");
+      quantity = parsePositiveNumber(quantityEntries[index], "Quantity");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Invalid input";
+      redirect(`/client?error=${encodeURIComponent(`Item ${index + 1}: ${message}`)}`);
+    }
 
-  if (error) {
-    redirect(`/client?error=${encodeURIComponent(error.message)}`);
+    if (!["GY", "NS"].includes(type)) {
+      redirect(`/client?error=${encodeURIComponent(`Item ${index + 1}: Select valid type`)}`);
+    }
+
+    orderRows.push({ gsm, bf, inch, type: type as ProductType, quantity });
+  }
+
+  const createdOrderIds: string[] = [];
+  for (const row of orderRows) {
+    const { data: newOrderId, error } = await supabase.rpc("create_order_with_item_v2", {
+      p_gsm: row.gsm,
+      p_bf: row.bf,
+      p_inch: row.inch,
+      p_type: row.type,
+      p_quantity: row.quantity,
+    });
+
+    if (error) {
+      redirect(`/client?error=${encodeURIComponent(error.message)}`);
+    }
+    createdOrderIds.push(String(newOrderId));
   }
 
   const { data: admins } = await supabase
@@ -892,11 +929,19 @@ export async function createOrderAction(formData: FormData) {
     .eq("role", "admin")
     .eq("approval_status", "approved");
 
+  const orderIdLabel =
+    createdOrderIds.length === 1 ? createdOrderIds[0] : `${createdOrderIds[0]} (+${createdOrderIds.length - 1} more)`;
   const template = orderPlacedAdminTemplate({
     customerName: profile.name,
     customerEmail: user.email ?? profile.email,
-    orderId: String(newOrderId),
-    itemRows: [{ gsm, bf, inch, type: type as ProductType, requested: quantity }],
+    orderId: orderIdLabel,
+    itemRows: orderRows.map((row) => ({
+      gsm: row.gsm,
+      bf: row.bf,
+      inch: row.inch,
+      type: row.type,
+      requested: row.quantity,
+    })),
   });
 
   for (const admin of admins ?? []) {
@@ -905,7 +950,7 @@ export async function createOrderAction(formData: FormData) {
   }
 
   revalidateAdminViews();
-  redirect("/client?message=Order+submitted");
+  redirect(`/client?message=${encodeURIComponent(`${createdOrderIds.length} order(s) submitted`)}`);
 }
 
 export async function createSpecialRequestAction(formData: FormData) {

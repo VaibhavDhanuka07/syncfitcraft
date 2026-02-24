@@ -36,17 +36,30 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
     <main className="grid min-h-screen place-items-center bg-slate-100 px-4 py-10">
       <section className="w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-2">
-          <div className="bg-slate-900 p-8 text-slate-50 lg:p-10">
-            <p className="text-xs uppercase tracking-[0.3em] text-emerald-300">SyncFit Kraft</p>
-            <h1 className="mt-4 text-3xl font-bold leading-tight">Inventory and Order Management</h1>
-            <p className="mt-3 text-sm text-slate-300">
-              Supabase auth + RLS security, admin approval workflow, and real-time stock deduction.
+          <div className="relative overflow-hidden bg-slate-950 p-8 text-slate-50 lg:p-10">
+            <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute -right-24 bottom-10 h-64 w-64 rounded-full bg-cyan-400/15 blur-3xl" />
+
+            <h1 className="text-[clamp(3rem,7vw,4rem)] font-extrabold leading-[0.95] tracking-[0.015em] text-white">
+              <span className="hero-brand-chip">SyncFit Kraft</span>
+            </h1>
+            <p className="mt-5 text-base font-semibold text-slate-200 md:text-lg">
+              Inventory and Order Management
             </p>
-            <ul className="mt-8 space-y-2 text-sm text-slate-200">
-              <li>- Role-based routing (admin/client)</li>
-              <li>- Atomic stock deduction on approval</li>
-              <li>- Registration approval before login access</li>
-            </ul>
+
+            <figure className="hero-reel-card fade-in-up mt-9">
+              <video
+                className="hero-reel-image h-auto w-full"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                aria-label="Kraft paper reel showcase video"
+              >
+                <source src="/login-hero-reel.mp4" type="video/mp4" />
+              </video>
+            </figure>
           </div>
           <div className="space-y-6 p-8 lg:p-10">
             <Alert message={message} type="success" />

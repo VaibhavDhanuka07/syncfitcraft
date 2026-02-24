@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">3D Brown Kraft Paper Reel</title>
+  <desc id="desc">A realistic brown kraft paper reel with cylindrical depth, grain texture, and soft industrial lighting.</desc>
+  <defs>
+    <linearGradient id="sceneBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <radialGradient id="groundShadow" cx="50%" cy="68%" r="50%">
+      <stop offset="0%" stop-color="#334155" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="kraftBody" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#9d6f3f" />
+      <stop offset="14%" stop-color="#c09258" />
+      <stop offset="28%" stop-color="#d9ae74" />
+      <stop offset="46%" stop-color="#f0cca0" />
+      <stop offset="58%" stop-color="#d4a066" />
+      <stop offset="74%" stop-color="#bb864d" />
+      <stop offset="100%" stop-color="#8f6237" />
+    </linearGradient>
+    <linearGradient id="bodyRim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#80552f" />
+      <stop offset="60%" stop-color="#f2d0a5" />
+      <stop offset="100%" stop-color="#734b28" />
+    </linearGradient>
+    <radialGradient id="leftCap" cx="38%" cy="38%" r="64%">
+      <stop offset="0%" stop-color="#f8d8ae" />
+      <stop offset="48%" stop-color="#c9975d" />
+      <stop offset="100%" stop-color="#82552d" />
+    </radialGradient>
+    <radialGradient id="rightCap" cx="42%" cy="42%" r="62%">
+      <stop offset="0%" stop-color="#f5d1a5" />
+      <stop offset="52%" stop-color="#be894f" />
+      <stop offset="100%" stop-color="#764a28" />
+    </radialGradient>
+    <radialGradient id="coreOuter" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#6b4425" />
+      <stop offset="100%" stop-color="#3f2918" />
+    </radialGradient>
+    <radialGradient id="coreInner" cx="48%" cy="44%" r="55%">
+      <stop offset="0%" stop-color="#1f2937" />
+      <stop offset="100%" stop-color="#111827" />
+    </radialGradient>
+    <filter id="paperGrain" x="-20%" y="-30%" width="150%" height="170%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" seed="22" />
+      <feColorMatrix type="saturate" values="0.2" />
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.13" />
+      </feComponentTransfer>
+    </filter>
+    <filter id="reelShadow" x="-25%" y="-30%" width="170%" height="200%">
+      <feDropShadow dx="0" dy="28" stdDeviation="20" flood-color="#020617" flood-opacity="0.62" />
+    </filter>
+    <filter id="softGlow" x="-30%" y="-30%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="7" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#sceneBg)" />
+  <ellipse cx="600" cy="640" rx="390" ry="105" fill="url(#groundShadow)" />
+
+  <g transform="translate(180 120)" filter="url(#reelShadow)">
+    <ellipse cx="762" cy="304" rx="198" ry="178" fill="url(#rightCap)" />
+    <ellipse cx="760" cy="304" rx="67" ry="61" fill="url(#coreOuter)" />
+    <ellipse cx="760" cy="304" rx="40" ry="37" fill="url(#coreInner)" />
+
+    <rect x="180" y="126" width="582" height="356" rx="4" fill="url(#kraftBody)" />
+    <rect x="180" y="126" width="582" height="356" rx="4" fill="url(#bodyRim)" opacity="0.28" />
+    <rect x="180" y="126" width="582" height="356" rx="4" filter="url(#paperGrain)" />
+
+    <rect x="245" y="126" width="14" height="356" fill="#f2d8b5" opacity="0.42" />
+    <rect x="348" y="126" width="7" height="356" fill="#f3dfc0" opacity="0.26" />
+    <rect x="480" y="126" width="10" height="356" fill="#f0d0a8" opacity="0.24" />
+    <rect x="612" y="126" width="14" height="356" fill="#f7dfbd" opacity="0.29" />
+
+    <ellipse cx="184" cy="304" rx="198" ry="178" fill="url(#leftCap)" />
+    <ellipse cx="184" cy="304" rx="62" ry="57" fill="url(#coreOuter)" />
+    <ellipse cx="184" cy="304" rx="35" ry="33" fill="url(#coreInner)" />
+
+    <ellipse cx="184" cy="304" rx="198" ry="178" fill="none" stroke="#f5d9b4" stroke-opacity="0.5" stroke-width="6" />
+    <ellipse cx="762" cy="304" rx="198" ry="178" fill="none" stroke="#efd1ac" stroke-opacity="0.28" stroke-width="5" />
+  </g>
+
+  <path d="M150 165c96-82 230-121 359-103" fill="none" stroke="#f8fafc" stroke-opacity="0.2" stroke-width="8" stroke-linecap="round" filter="url(#softGlow)" />
+  <path d="M178 194c59-48 129-73 200-77" fill="none" stroke="#fef3c7" stroke-opacity="0.24" stroke-width="5" stroke-linecap="round" filter="url(#softGlow)" />
+</svg>

@@ -63,7 +63,7 @@ export default async function ClientPage({ searchParams }: { searchParams: Searc
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-4 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
-          <p className="font-semibold">Today's Market Price</p>
+          <p className="font-semibold">Today&apos;s Market Price</p>
           <p className="mt-1 whitespace-pre-wrap">
             {banner?.message && banner.message.trim().length > 0
               ? banner.message
