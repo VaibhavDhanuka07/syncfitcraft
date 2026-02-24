@@ -16,6 +16,11 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "SyncFit Kraft OMS",
   description: "Production-ready inventory and order management system",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

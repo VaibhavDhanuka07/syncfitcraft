@@ -40,8 +40,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
             <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
             <div className="pointer-events-none absolute -right-24 bottom-10 h-64 w-64 rounded-full bg-cyan-400/15 blur-3xl" />
 
-            <h1 className="text-[clamp(3rem,7vw,4rem)] font-extrabold leading-[0.95] tracking-[0.015em] text-white">
-              <span className="hero-brand-chip">SyncFit Kraft</span>
+            <h1 className="text-[clamp(3rem,7vw,4rem)] font-bold leading-[0.95] tracking-[0.02em] text-white">
+              <span className="hero-brand-chip">SYNCFIT KRAFT</span>
             </h1>
             <p className="mt-5 text-base font-semibold text-slate-200 md:text-lg">
               Inventory and Order Management
