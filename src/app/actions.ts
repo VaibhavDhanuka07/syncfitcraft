@@ -10,11 +10,13 @@ import { createClient } from "@/lib/supabase/server";
 import type { OrderItemStatus, ProductType } from "@/lib/types";
 
 type OrderEmailItemRow = {
+  requested_gsm: number;
+  requested_bf: number;
+  requested_inch: number;
+  requested_type: ProductType;
   quantity_requested: number;
   quantity_approved: number;
-  status: OrderItemStatus;
   item_status: "pending" | "accepted" | "rejected";
-  products: { gsm: number; bf: number; inch: number; type: ProductType } | null;
 };
 
 const PHONE_REGEX = /^[0-9]{10}$/;
@@ -128,15 +130,15 @@ async function sendOrderStatusEmail(supabase: Awaited<ReturnType<typeof createCl
 
   const { data: items } = await supabase
     .from("order_items")
-    .select("quantity_requested,quantity_approved,status,item_status,products(gsm,bf,inch,type)")
+    .select("requested_gsm,requested_bf,requested_inch,requested_type,quantity_requested,quantity_approved,item_status")
     .eq("order_id", orderId)
     .returns<OrderEmailItemRow[]>();
 
   const rows = (items ?? []).map((item) => ({
-    gsm: item.products?.gsm ?? 0,
-    bf: item.products?.bf ?? 0,
-    inch: item.products?.inch ?? 0,
-    type: item.products?.type ?? "GY",
+    gsm: item.requested_gsm,
+    bf: item.requested_bf,
+    inch: item.requested_inch,
+    type: item.requested_type,
     requested: item.quantity_requested,
     approved: item.quantity_approved,
     status: item.item_status as OrderItemStatus,
@@ -907,20 +909,12 @@ export async function createOrderAction(formData: FormData) {
     orderRows.push({ gsm, bf, inch, type: type as ProductType, quantity });
   }
 
-  const createdOrderIds: string[] = [];
-  for (const row of orderRows) {
-    const { data: newOrderId, error } = await supabase.rpc("create_order_with_item_v2", {
-      p_gsm: row.gsm,
-      p_bf: row.bf,
-      p_inch: row.inch,
-      p_type: row.type,
-      p_quantity: row.quantity,
-    });
+  const { data: newOrderId, error } = await supabase.rpc("create_order_with_items_v3", {
+    p_rows: orderRows as unknown as object,
+  });
 
-    if (error) {
-      redirect(`/client?error=${encodeURIComponent(error.message)}`);
-    }
-    createdOrderIds.push(String(newOrderId));
+  if (error || !newOrderId) {
+    redirect(`/client?error=${encodeURIComponent(error?.message ?? "Unable to create order")}`);
   }
 
   const { data: admins } = await supabase
@@ -929,12 +923,10 @@ export async function createOrderAction(formData: FormData) {
     .eq("role", "admin")
     .eq("approval_status", "approved");
 
-  const orderIdLabel =
-    createdOrderIds.length === 1 ? createdOrderIds[0] : `${createdOrderIds[0]} (+${createdOrderIds.length - 1} more)`;
   const template = orderPlacedAdminTemplate({
     customerName: profile.name,
     customerEmail: user.email ?? profile.email,
-    orderId: orderIdLabel,
+    orderId: String(newOrderId),
     itemRows: orderRows.map((row) => ({
       gsm: row.gsm,
       bf: row.bf,
@@ -950,7 +942,7 @@ export async function createOrderAction(formData: FormData) {
   }
 
   revalidateAdminViews();
-  redirect(`/client?message=${encodeURIComponent(`${createdOrderIds.length} order(s) submitted`)}`);
+  redirect(`/client?message=${encodeURIComponent(`Order submitted with ${orderRows.length} item(s)`)}`);
 }
 
 export async function createSpecialRequestAction(formData: FormData) {

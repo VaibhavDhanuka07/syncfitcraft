@@ -11,6 +11,10 @@ import Link from "next/link";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 type ClientOrderItem = {
+  requested_gsm: number;
+  requested_bf: number;
+  requested_inch: number;
+  requested_type: "GY" | "NS";
   quantity_requested: number;
   quantity_approved: number;
   item_status: "pending" | "accepted" | "rejected";
@@ -32,7 +36,7 @@ export default async function ClientPage({ searchParams }: { searchParams: Searc
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("id,gsm,bf,inch,status,created_at,order_items(quantity_requested,quantity_approved,item_status,products(gsm,bf,inch,size,type,price,discount))")
+    .select("id,gsm,bf,inch,status,created_at,order_items(requested_gsm,requested_bf,requested_inch,requested_type,quantity_requested,quantity_approved,item_status,products(gsm,bf,inch,size,type,price,discount))")
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false })
     .returns<ClientOrder[]>();
@@ -130,7 +134,7 @@ export default async function ClientPage({ searchParams }: { searchParams: Searc
                     <tbody>
                       {(order.order_items ?? []).map((item, idx) => (
                         <tr key={`${order.id}-${idx}`} className="border-b border-slate-100">
-                          <td className="py-2">{order.gsm}/{order.bf}/{order.inch}</td>
+                          <td className="py-2">{item.requested_gsm}/{item.requested_bf}/{item.requested_inch}/{item.requested_type}</td>
                           <td className="py-2">{item.products?.gsm}/{item.products?.bf}/{item.products?.size ?? item.products?.inch}/{item.products?.type}</td>
                           <td className="py-2">{item.quantity_requested}</td>
                           <td className="py-2">{item.quantity_approved}</td>

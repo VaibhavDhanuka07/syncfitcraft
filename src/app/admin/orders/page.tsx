@@ -12,6 +12,10 @@ type AdminOrderItemRow = {
   id: string;
   order_id: string;
   product_id: string;
+  requested_gsm: number;
+  requested_bf: number;
+  requested_inch: number;
+  requested_type: ProductType;
   quantity_requested: number;
   quantity_approved: number;
   item_status: "pending" | "accepted" | "rejected";
@@ -78,7 +82,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   const { data: orderItems } = orderIds.length
     ? await supabase
         .from("order_items")
-        .select("id,order_id,product_id,quantity_requested,quantity_approved,item_status")
+        .select("id,order_id,product_id,requested_gsm,requested_bf,requested_inch,requested_type,quantity_requested,quantity_approved,item_status")
         .in("order_id", orderIds)
         .returns<Omit<AdminOrderItemRow, "products">[]>()
     : { data: [] as Omit<AdminOrderItemRow, "products">[] };
@@ -163,7 +167,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                     <tbody>
                       {orderItems.map((item) => (
                         <tr key={item.id} className="border-b border-slate-100">
-                          <td className="py-2">{order.gsm}/{order.bf}/{order.inch}</td>
+                          <td className="py-2">{item.requested_gsm}/{item.requested_bf}/{item.requested_inch}/{item.requested_type}</td>
                           <td className="py-2">{item.products?.gsm}/{item.products?.bf}/{item.products?.size ?? item.products?.inch}/{item.products?.type}</td>
                           <td className="py-2">{item.quantity_requested}</td>
                           <td className="py-2">{item.quantity_approved}</td>
@@ -192,7 +196,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                             <input
                               type="number"
                               name="gsm"
-                              defaultValue={item.products?.gsm ?? ""}
+                              defaultValue={item.requested_gsm}
                               min={60}
                               max={400}
                               required
@@ -201,7 +205,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                             <input
                               type="number"
                               name="bf"
-                              defaultValue={item.products?.bf ?? ""}
+                              defaultValue={item.requested_bf}
                               min={16}
                               max={40}
                               required
@@ -210,7 +214,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                             <input
                               type="number"
                               name="inch"
-                              defaultValue={item.products?.size ?? item.products?.inch ?? ""}
+                              defaultValue={item.requested_inch}
                               min={10}
                               max={60}
                               required
@@ -218,7 +222,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                             />
                             <select
                               name="type"
-                              defaultValue={item.products?.type ?? "GY"}
+                              defaultValue={item.requested_type}
                               className="rounded-lg border border-slate-300 px-2 py-1 text-xs"
                             >
                               <option value="GY">GY</option>

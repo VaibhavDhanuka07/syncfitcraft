@@ -32,6 +32,10 @@ type RouteOrder = {
 
 type RouteOrderItem = {
   id: string;
+  requested_gsm: number;
+  requested_bf: number;
+  requested_inch: number;
+  requested_type: ProductType;
   quantity_requested: number;
   quantity_approved: number;
   item_status: "pending" | "accepted" | "rejected";
@@ -92,7 +96,7 @@ async function getOrderExportData(orderId: string, requestUserId: string): Promi
 
   const { data: orderItems } = await supabase
     .from("order_items")
-    .select("id,quantity_requested,quantity_approved,item_status,products(gsm,bf,inch,size,type,price,discount)")
+    .select("id,requested_gsm,requested_bf,requested_inch,requested_type,quantity_requested,quantity_approved,item_status,products(gsm,bf,inch,size,type,price,discount)")
     .eq("order_id", order.id)
     .order("created_at", { ascending: true })
     .returns<RouteOrderItem[]>();
@@ -108,7 +112,7 @@ async function getOrderExportData(orderId: string, requestUserId: string): Promi
   }
 
   const items = (orderItems ?? []).map((item) => {
-    const requestedSpec = buildSpec(order.gsm, order.bf, order.inch);
+    const requestedSpec = buildSpec(item.requested_gsm, item.requested_bf, item.requested_inch, item.requested_type);
     const acceptedSpec = buildSpec(
       item.products?.gsm,
       item.products?.bf,
