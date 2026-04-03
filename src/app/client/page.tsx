@@ -1,9 +1,11 @@
 import { Alert } from "@/components/alert";
 import { ClientOrderForm } from "@/components/client-order-form";
+import { OrderExportLinks } from "@/components/order-export-links";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { createOrderAction, signOutAction } from "@/app/actions";
 import { BF_VALUES, GSM_VALUES, INCH_VALUES, PRODUCT_TYPES } from "@/lib/constants";
+import { isOrderExportable } from "@/lib/order-export";
 import { requireRole } from "@/lib/auth";
 import Link from "next/link";
 
@@ -83,46 +85,68 @@ export default async function ClientPage({ searchParams }: { searchParams: Searc
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold">Order History</h2>
         <div className="mt-4 space-y-4">
-          {(orders ?? []).map((order) => (
-            <article key={order.id} className="rounded-xl border border-slate-200 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold">Order #{order.id.slice(0, 8)}</p>
-                <StatusPill status={order.status} />
-              </div>
-              <p className="mt-1 text-xs text-slate-600">{new Date(order.created_at).toLocaleString()}</p>
+          {(orders ?? []).map((order) => {
+            const canExport = isOrderExportable(
+              order.status,
+              (order.order_items ?? []).map((item) => ({
+                itemStatus: item.item_status,
+                approvedQuantity: item.quantity_approved,
+              })),
+            );
 
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full min-w-[820px] text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-600">
-                      <th className="py-2">Requested Spec</th>
-                      <th className="py-2">Accepted Spec</th>
-                      <th className="py-2">Requested</th>
-                      <th className="py-2">Approved</th>
-                      <th className="py-2">Rejected</th>
-                      <th className="py-2">Price</th>
-                      <th className="py-2">Item Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(order.order_items ?? []).map((item, idx) => (
-                      <tr key={`${order.id}-${idx}`} className="border-b border-slate-100">
-                        <td className="py-2">{order.gsm}/{order.bf}/{order.inch}</td>
-                        <td className="py-2">{item.products?.gsm}/{item.products?.bf}/{item.products?.size ?? item.products?.inch}/{item.products?.type}</td>
-                        <td className="py-2">{item.quantity_requested}</td>
-                        <td className="py-2">{item.quantity_approved}</td>
-                        <td className="py-2">{item.quantity_requested - item.quantity_approved}</td>
-                        <td className="py-2">
-                          {item.products ? (item.products.price - (item.products.price * item.products.discount) / 100).toFixed(2) : "-"}
-                        </td>
-                        <td className="py-2"><StatusPill status={item.item_status} /></td>
+            return (
+              <article key={order.id} className="rounded-xl border border-slate-200 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <p className="text-sm font-semibold">Order #{order.id.slice(0, 8)}</p>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <StatusPill status={order.status} />
+                  </div>
+                </div>
+                <p className="mt-1 text-xs text-slate-600">{new Date(order.created_at).toLocaleString()}</p>
+
+                {canExport ? (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Order Downloads</p>
+                      <p className="mt-1 text-sm text-slate-700">Download the accepted order description in PDF or Excel format.</p>
+                    </div>
+                    <OrderExportLinks orderId={order.id} canExport={canExport} />
+                  </div>
+                ) : null}
+
+                <div className="mt-3 overflow-x-auto">
+                  <table className="w-full min-w-[820px] text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-600">
+                        <th className="py-2">Requested Spec</th>
+                        <th className="py-2">Accepted Spec</th>
+                        <th className="py-2">Requested</th>
+                        <th className="py-2">Approved</th>
+                        <th className="py-2">Rejected</th>
+                        <th className="py-2">Price</th>
+                        <th className="py-2">Item Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </article>
-          ))}
+                    </thead>
+                    <tbody>
+                      {(order.order_items ?? []).map((item, idx) => (
+                        <tr key={`${order.id}-${idx}`} className="border-b border-slate-100">
+                          <td className="py-2">{order.gsm}/{order.bf}/{order.inch}</td>
+                          <td className="py-2">{item.products?.gsm}/{item.products?.bf}/{item.products?.size ?? item.products?.inch}/{item.products?.type}</td>
+                          <td className="py-2">{item.quantity_requested}</td>
+                          <td className="py-2">{item.quantity_approved}</td>
+                          <td className="py-2">{item.quantity_requested - item.quantity_approved}</td>
+                          <td className="py-2">
+                            {item.products ? (item.products.price - (item.products.price * item.products.discount) / 100).toFixed(2) : "-"}
+                          </td>
+                          <td className="py-2"><StatusPill status={item.item_status} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
     </Shell>

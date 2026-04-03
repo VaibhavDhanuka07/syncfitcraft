@@ -1,7 +1,7 @@
-import PDFDocument from "pdfkit";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
+import { createPdfBuffer } from "@/lib/pdf";
 import { createRouteClient } from "@/lib/supabase/route";
 
 export const runtime = "nodejs";
@@ -122,13 +122,7 @@ async function getExportRows(request: NextRequest): Promise<ExportRow[]> {
 }
 
 async function buildPdf(rows: ExportRow[]) {
-  return await new Promise<Buffer>((resolve) => {
-    const doc = new PDFDocument({ margin: 40, size: "A4" });
-    const chunks: Buffer[] = [];
-
-    doc.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-
+  return await createPdfBuffer((doc) => {
     doc.fontSize(14).text("Order Export", { underline: true });
     doc.moveDown(0.8);
 
@@ -140,9 +134,7 @@ async function buildPdf(rows: ExportRow[]) {
         );
       doc.moveDown(0.4);
     });
-
-    doc.end();
-  });
+  }, { margin: 40, size: "A4" });
 }
 
 export async function GET(request: NextRequest) {

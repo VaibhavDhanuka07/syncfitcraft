@@ -1,8 +1,8 @@
 import ExcelJS from "exceljs";
 import { Parser } from "json2csv";
-import PDFDocument from "pdfkit";
 import { NextRequest, NextResponse } from "next/server";
 
+import { createPdfBuffer } from "@/lib/pdf";
 import { createRouteClient } from "@/lib/supabase/route";
 
 export const runtime = "nodejs";
@@ -137,18 +137,13 @@ async function createXlsx(rows: ExportRow[]) {
 }
 
 async function createPdf(rows: ExportRow[]) {
-  return await new Promise<Buffer>((resolve) => {
-    const doc = new PDFDocument({ margin: 30 });
-    const chunks: Buffer[] = [];
-    doc.on("data", (c) => chunks.push(Buffer.from(c)));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
+  return await createPdfBuffer((doc) => {
     doc.fontSize(12).text("Orders Report");
     doc.moveDown(0.8);
     for (const row of rows) {
       doc.fontSize(8).text(`${row.order_id} | ${row.user} | ${row.product}/${row.type} | ${row.status} | ${row.quantity} | ${row.price.toFixed(2)} | ${row.date}`);
     }
-    doc.end();
-  });
+  }, { margin: 30 });
 }
 
 export async function GET(request: NextRequest) {
